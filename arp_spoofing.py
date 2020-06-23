@@ -13,15 +13,32 @@ parse = parse.parse_args()
 
 
 def get_mac(gateway):
-	pass
+	arp_layer = ARP(pdst=gateway)
+	broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
+	final_packet = broadcast / arp_layer
+
+	mac = srp(final_packet, timeout=2, verbose=False)[0]
+	mac = mac[0][1].hwsrc
+	return mac
 
 
-def scanner_red(range,gateway):
-	pass
+def scanner_red(rango,gateway):
+	lista_hosts = dict()
+
+	arp_layer = ARP(pdst=rango)
+	broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
+	final_packet = broadcast / arp_layer
+
+	answers = srp(final_packet, timeout=2, verbose=False)[0]
+	print('\n')
+
+	for a in answers:
+		print(a)
 
 
 def restore_arp(destip,sourceip,hwsrc,hwdst):
 	pass
+
 
 
 def arp_spoofing(hwdst,pdst,psrc):
@@ -30,7 +47,13 @@ def arp_spoofing(hwdst,pdst,psrc):
 
 
 def main():
-	pass
+	if parse.range and parse.gateway:
+		mac_gateway = get_mac(parse.gateway)
+		print(mac_gateway)
+		scanner_red(parse.range, parse.gateway)
+
+	else:
+		print("Necesito opciones")
 
 
 
